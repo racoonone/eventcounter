@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Event Counter</title>
+<style>
+body{margin:0;background:#111;color:#fff;font-family:-apple-system,Arial}
+.wrap{max-width:430px;margin:auto;padding:20px}
+.card{background:#222;border-radius:18px;padding:18px;margin:12px 0}
+h1{text-align:center}
+#total{text-align:center;font-size:70px;font-weight:bold}
+.row{display:flex;justify-content:space-between;align-items:center}
+.name{font-size:22px}
+.ctrl{display:flex;gap:12px;align-items:center}
+button{width:60px;height:60px;font-size:32px;border-radius:12px;border:0}
+.val{font-size:30px}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+<h1>TOTAL ENTRIES</h1>
+<div id="total">...</div>
+<div id="list"></div>
+<button id="reset">RESET</button>
+</div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getFirestore,doc,onSnapshot,setDoc,updateDoc,increment}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const app=initializeApp({
+apiKey:"AIzaSyA1ZKxG-z1yafnh5B38xCc5VP0H6YUE_UE",
+authDomain:"counter-kasse.firebaseapp.com",
+projectId:"counter-kasse",
+storageBucket:"counter-kasse.firebasestorage.app",
+messagingSenderId:"588054951060",
+appId:"1:588054951060:web:4bd57f30326eadf1263081"
+});
+
+const db=getFirestore(app);
+const ref=doc(db,"counter","main");
+const cats=["Online","Box Office","Free","Half"];
+
+onSnapshot(ref,(snap)=>{
+const d=snap.data() || {};
+let sum=0;
+list.innerHTML="";
+
+cats.forEach(c=>{
+let value=d[c] || 0;
+sum += value;
+
+let div=document.createElement("div");
+div.className="card";
+
+div.innerHTML=`
+<div class="row">
+<div class="name">${c}</div>
+<div class="ctrl">
+<button>-</button>
+<div class="val">${value}</div>
+<button>+</button>
+</div>
+</div>`;
+
+let buttons=div.querySelectorAll("button");
+
+buttons[0].onclick=()=>{
+updateDoc(ref,{[c]:increment(-1)});
+};
+
+buttons[1].onclick=()=>{
+updateDoc(ref,{[c]:increment(1)});
+};
+
+list.appendChild(div);
+});
+
+total.innerText=sum;
+});
+
+reset.onclick=()=>{
+setDoc(ref,{
+Online:0,
+"Box Office":0,
+Free:0,
+Half:0
+});
+};
+</script>
+</body>
+</html>
